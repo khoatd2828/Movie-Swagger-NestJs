@@ -2,10 +2,12 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import { JwtStrategy } from './strategy/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { TicketModule } from './ticket/ticket.module';
+import { RapModule } from './rap/rap.module';
+import { PhimModule } from './phim/phim.module';
 
 @Module({
   imports: [
@@ -21,8 +23,12 @@ import { AuthModule } from './auth/auth.module';
     }),
     UserModule,
     AuthModule,
+    TicketModule,
+    RapModule,
+    PhimModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtStrategy],
+  providers: [AppService],
+
 })
 export class AppModule {}
