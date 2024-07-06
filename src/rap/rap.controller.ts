@@ -23,4 +23,9 @@ export class RapController {
   getInfoCumRapHeThong(@Query('maHeThongRap') maHeThongRap: string) {
     return this.rapService.getInfoCumRapHeThong(maHeThongRap);
   }
+
+  @Get('LayThongTinLichChieuHeThongRap')
+  getInfoLichChieuHeThong(@Query('maHeThongRap') maHeThongRap: string) {
+    return this.rapService.getInfoLichChieuHeThong(maHeThongRap);
+  }
 }

@@ -1,3 +1,4 @@
+import { Phim, LichChieu } from './../ticket/entities/ticket.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
@@ -50,8 +51,6 @@ export class RapService {
       },
     });
 
-    
-    
     const heThongRapChieu = lichChieuPhim.map((lichChieu) => ({
       maHeThongRap: lichChieu.RapPhim.CumRap.HeThongRap.ma_he_thong_rap,
       tenHeThongRap: lichChieu.RapPhim.CumRap.HeThongRap.ten_he_thong_rap,
@@ -74,36 +73,89 @@ export class RapService {
         },
       ],
     }));
-  
+
     return { content: { heThongRapChieu } };
   }
 
-  async getInfoCumRapHeThong(maHeThongRapNumber: string) {
+  async getInfoCumRapHeThong(maHeThongRap: string) {
     const heThongRapPhim = await this.prisma.heThongRap.findMany({
       where: {
-      ten_he_thong_rap: maHeThongRapNumber,
+        ten_he_thong_rap: maHeThongRap,
       },
       include: {
         CumRap: {
           include: {
-            RapPhim: true
+            RapPhim: true,
+          },
+        },
+      },
+    });
+
+    const heThongRapChieu = heThongRapPhim.flatMap((heThong) =>
+      heThong.CumRap.map((cumRap) => ({
+        maCumRap: cumRap.ma_cum_rap,
+        tenCumRap: cumRap.ten_cum_rap,
+        diaChi: cumRap.dia_chi,
+        danhSachRap: cumRap.RapPhim.map((rapPhim) => ({
+          maRap: rapPhim.ma_rap,
+          tenRap: rapPhim.ten_rap,
+        })),
+      })),
+    );
+
+    return { content: { heThongRapChieu } };
+  }
+
+  async getInfoLichChieuHeThong(maHeThongRap: string) {
+    const heThongRapPhim = await this.prisma.heThongRap.findMany({
+      where: {
+        ten_he_thong_rap: maHeThongRap,
+      },
+      include: {
+        CumRap: {
+          include: {
+            RapPhim: {
+              include: {
+                LichChieu: {
+                  include: {
+                    Phim: true,
+                  },
+                },
+              },
             },
           },
         },
+      },
     });
 
-    const heThongRapChieu = heThongRapPhim.flatMap((heThong) => 
-      heThong.CumRap.map((cumRap) => ({
-          maCumRap: cumRap.ma_cum_rap,
-          tenCumRap: cumRap.ten_cum_rap,
-          diaChi: cumRap.dia_chi,
-          danhSachRap: cumRap.RapPhim.map((rapPhim) => ({
-              maRap: rapPhim.ma_rap,
+    const heThongRapChieu = heThongRapPhim.map((heThong) => ({
+      maHeThongRap: heThong.ma_he_thong_rap,
+      tenHeThongRap: heThong.ten_he_thong_rap,
+      logo: heThong.logo,
+      lstCumRap: heThong.CumRap.map((cumRap) => ({
+        maCumRap: cumRap.ma_cum_rap,
+        tenCumRap: cumRap.ten_cum_rap,
+        diaChi: cumRap.dia_chi,
+        danhSachRap: cumRap.RapPhim.map((rapPhim) => ({
+          maRap: rapPhim.ma_rap,
+          tenRap: rapPhim.ten_rap,
+          danhSachPhim: rapPhim.LichChieu.map((lichchieu) => ({
+            maPhim: lichchieu.Phim.ma_phim,
+            tenPhim: lichchieu.Phim.ten_phim,
+            hot: lichchieu.Phim.hot,
+            dangChieu: lichchieu.Phim.dang_chieu,
+            sapChieu: lichchieu.Phim.sap_chieu,
+            lstLichChieuTheoPhim: rapPhim.LichChieu.map((lichChieu) => ({
+              maLichChieu: lichChieu.ma_lich_chieu,
+              maRap: lichChieu.ma_rap,
               tenRap: rapPhim.ten_rap,
+              ngayChieuGioChieu: lichChieu.ngay_gio_chieu,
+              giaVe: lichChieu.gia_ve,
+            })),
           })),
-      }))
-  );
-  
+        })),
+      })),
+    }));
     return { content: { heThongRapChieu } };
   }
 }
